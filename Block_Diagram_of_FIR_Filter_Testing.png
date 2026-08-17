@@ -1,0 +1,122 @@
+# RTL-Design-of-FIR-Filter-on-FPGA-using-Verilog
+created by [Kittiphop Phanthachart](https://bento.me/mac-kittiphop) (a 4th-year Engineering student, FPGA/DSP Engineer Intern @Thai Space Consortium, NARIT.)
+
+
+----
+
+
+This project implements a FIR (Finite Impulse Response) filter on FPGA using Verilog HDL. Filter coefficients are calculated in Python and implemented using fixed-point arithmetic for efficient hardware computation. The design follows RTL methodology and is fully simulated and verified in Vivado, demonstrating correct functionality and expected filter response. This project showcases digital signal processing on FPGA with practical fixed-point implementation.
+
+
+Coefficient Design tool by : [FIR_Coeff_Design.py](https://github.com/XACKIES/RTL-Design-of-a-FIR-Filter-on-FPGA-using-Verilog/blob/main/FIR_Coeff_Design.py)
+
+
+----
+## Filter Stucture  , Transversal Form
+
+
+Reference : Digital Signal Processing Fundamentals and Applications 2'nd edition Li Tan,Jean Jiang
+
+![pic0](https://github.com/XACKIES/RTL-Design-of-a-FIR-Filter-on-FPGA-using-Verilog/blob/main/Doc/FIR%20filter%20realization%20Transversal%20form.png)
+
+
+```verilog
+    // ===== Multiply Stage =====
+    genvar i;
+    generate
+        for (i = 0; i < 41; i = i + 1) begin : mult_stage
+            assign products[i] = delay_line[i] * coeffs[i];
+        end
+    endgenerate
+
+    // ===== Main Logic =====
+    integer j;
+    always @(posedge clk) begin
+        // Shift delay line
+        for (j = 40; j > 0; j = j - 1) begin
+            delay_line[j] <= delay_line[j - 1];
+        end
+        delay_line[0] <= data_in;
+
+        // Single-stage sum
+        sum = 0;
+        for (j = 0; j < 41; j = j + 1) begin
+            sum = sum + products[j];
+        end
+
+        // Assign to output
+        data_out <= sum;
+    end
+```
+Verilog Code : [FIR Filter.v](https://github.com/XACKIES/RTL-Design-of-FIR-Filter-on-FPGA-using-Verilog/blob/main/RTL/FIR_Lowpass_Filter.v) 
+
+
+
+
+----
+
+## Block Diagram
+
+![pic1](https://github.com/XACKIES/RTL-Design-of-a-FIR-Filter-on-FPGA-using-Verilog/blob/main/Doc/Block_Diagram_of_FIR_Filter_Testing.png)
+
+----
+
+## Coefficient Design
+![pic2](https://github.com/XACKIES/RTL-Design-of-a-FIR-Filter-on-FPGA-using-Verilog/blob/main/Doc/Lowpass_Filter_Coeff.png)
+
+---
+
+## Filter Response
+![pic3](https://github.com/XACKIES/RTL-Design-of-a-FIR-Filter-on-FPGA-using-Verilog/blob/main/Doc/Spectrum_of_FIR_Filter.png)
+
+
+
+----
+
+## Simulation Result
+
+![pic4](https://github.com/XACKIES/RTL-Design-of-a-FIR-Filter-on-FPGA-using-Verilog/blob/main/Doc/Result_of_Simulation.png)
+
+----
+
+
+##  Applications
+
+- **Digital Communication Systems**  
+  Channel equalization, matched filtering, and pulse-shaping for modulation schemes (QPSK, OFDM, FSK).  
+
+- **Software-Defined Radio (SDR)**  
+  Band-limiting, channel filtering, and interference suppression in FPGA/ASIC SDR pipelines.  
+
+- **Audio Signal Processing**  
+  High-fidelity filtering for EQ, crossover networks, or noise shaping.  
+
+- **Biomedical Signal Processing**  
+  ECG/EKG noise removal, EEG feature extraction, or filtering physiological signals.  
+
+- **Radar / Sonar / Imaging**  
+  Clutter suppression, beamforming pre-processing, and matched-filter detection.  
+
+
+---
+
+##  Future Extensions
+
+- **Coefficient Reloading (Run-Time Programmable FIR)**  
+  Enable dynamic filter reconfiguration for adaptive systems.  
+
+- **Parallel Multiply-Accumulate (MAC) Pipeline**  
+  Improve throughput for high-sample-rate FPGA/ASIC applications.  
+
+- **Symmetry Optimization**  
+  Exploit coefficient symmetry to reduce multipliers and hardware cost.  
+
+- **Multi-Rate FIR Structures**  
+  Integrate decimation/interpolation for efficient sample-rate conversion.  
+
+- **Windowing & Design Automation**  
+  Add automated coefficient generation (e.g., Hamming, Blackman, Kaiser) for flexible filter design.  
+
+- **AI-Assisted FIR**  
+  Use neural networks or ML-based methods to adapt filter coefficients in real time for non-stationary environments.  
+
